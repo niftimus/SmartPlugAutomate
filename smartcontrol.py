@@ -11,10 +11,10 @@ click.anyio_backend = "asyncio"
 @click.command()
 @click.option('--plug_address', default="10.1.2.12", help='IP address of Smart Plug device.')
 @click.option('--solar_monitor_url', default="http://10.1.2.3/production.json", help='IP address of Solar Monitor device.')
-@click.option('--check_interval', default=1, help='Check interval in seconds.')
-@click.option('--min_power', default=-370, help='Minimum solar power in Watts before switching on.')
-@click.option('--min_off', default=5, help='Minimum off period in seconds.')
-@click.option('--min_on', default=5, help='Minimum on period in seconds.')
+@click.option('--check_interval', default=5, help='Check interval in seconds.')
+@click.option('--min_power', default=1700, help='Minimum solar power in Watts before switching on.')
+@click.option('--min_off', default=60, help='Minimum off period in seconds.')
+@click.option('--min_on', default=60, help='Minimum on period in seconds.')
 @click.pass_context
 async def main(ctx, plug_address, solar_monitor_url, check_interval, min_power, min_off, min_on):
     """Main monitoring loop"""
@@ -67,7 +67,6 @@ async def main(ctx, plug_address, solar_monitor_url, check_interval, min_power, 
 
         print(f'[{int(current_time)}] Overall W: {int(overall_net):5}, Plug W: {int(plug_consumption):5}, Secs since on: {int(time_since_on):5}, Secs since off: {int(time_since_off):5}, Switch count: {switchcount:5}, Plug on?: {is_on:5} ==> {threshold_string} {action_string}')
         time.sleep(check_interval - (time.time() % check_interval))
-
 
 if __name__ == "__main__":
     main()
