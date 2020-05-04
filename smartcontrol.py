@@ -65,7 +65,7 @@ async def main(ctx, plug_address, solar_monitor_url, check_interval, min_power, 
                 threshold_string = "Overall is under minimum."
                 action_string = "Leaving off."
 
-        print(f'[{time.time()}] Overall W: {overall_net}, Plug W: {plug_consumption}, Secs since on: {int(time_since_on)}, Secs since off: {int(time_since_off)}, Switch count: {switchcount}, Last Plug State: {is_on} ==> {threshold_string} {action_string}')
+        print(f'[{int(current_time)}] Overall W: {int(overall_net):5}, Plug W: {int(plug_consumption):5}, Secs since on: {int(time_since_on):5}, Secs since off: {int(time_since_off):5}, Switch count: {switchcount:5}, Plug on?: {is_on:5} ==> {threshold_string} {action_string}')
         time.sleep(check_interval - (time.time() % check_interval))
 
 
