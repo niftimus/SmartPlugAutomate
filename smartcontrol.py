@@ -2,7 +2,7 @@
 import asyncio
 import time
 import asyncclick as click
-from kasa import SmartPlug
+from kasa import SmartPlug, SmartDeviceException
 import requests
 import json
 
@@ -23,49 +23,53 @@ async def main(ctx, plug_address, solar_monitor_url, check_interval, min_power, 
     last_offtime = last_ontime
     switchcount = 0
     while True:
-        action_string = ""
-        await plug.update()
-        plugRealtime = await plug.get_emeter_realtime()
-        is_on = plug.is_on
-        r = requests.get(solar_monitor_url)
-        solar_json = r.json()
-        current_time = time.time()
-        overall_production = (solar_json["production"][1]["wNow"])
-        overall_consumption = (solar_json["consumption"][0]["wNow"])
-        overall_net = overall_production - overall_consumption
-        plug_consumption = plugRealtime["power_mw"]/1000
+        try:
+            action_string = ""
+            await plug.update()
+            plugRealtime = await plug.get_emeter_realtime()
+            is_on = plug.is_on
+            r = requests.get(solar_monitor_url)
+            solar_json = r.json()
+            current_time = time.time()
+            overall_production = (solar_json["production"][1]["wNow"])
+            overall_consumption = (solar_json["consumption"][0]["wNow"])
+            overall_net = overall_production - overall_consumption
+            plug_consumption = plugRealtime["power_mw"]/1000
 
-        time_since_off = current_time - last_offtime
-        time_since_on = current_time - last_ontime
+            time_since_off = current_time - last_offtime
+            time_since_on = current_time - last_ontime
 
-        if(is_on):
-            if((overall_net + plug_consumption)>=min_power):
-                threshold_string = "Overall is above minimum."
-                action_string = "Leaving on."
-            else:
-                threshold_string = "Overall is under minimum."
-                if (time_since_on<min_on):
+            if(is_on):
+                if((overall_net + plug_consumption)>=min_power):
+                    threshold_string = "Overall is above minimum."
                     action_string = "Leaving on."
                 else:
-                    action_string = "Turning off."
-                    await plug.turn_off()
-                    last_offtime = current_time
-                    switchcount += 1
-        else:
-            if((overall_net + plug_consumption)>=min_power):
-                threshold_string = "Overall is above minimum."
-                if (time_since_off<min_off):
-                    action_string = "Leaving off."
-                else:
-                    action_string = "Turning on."
-                    last_ontime = current_time
-                    await plug.turn_on()
-                    switchcount+=1
+                    threshold_string = "Overall is under minimum."
+                    if (time_since_on<min_on):
+                        action_string = "Leaving on."
+                    else:
+                        action_string = "Turning off."
+                        await plug.turn_off()
+                        last_offtime = current_time
+                        switchcount += 1
             else:
-                threshold_string = "Overall is under minimum."
-                action_string = "Leaving off."
+                if((overall_net + plug_consumption)>=min_power):
+                    threshold_string = "Overall is above minimum."
+                    if (time_since_off<min_off):
+                        action_string = "Leaving off."
+                    else:
+                        action_string = "Turning on."
+                        last_ontime = current_time
+                        await plug.turn_on()
+                        switchcount+=1
+                else:
+                    threshold_string = "Overall is under minimum."
+                    action_string = "Leaving off."
 
-        print(f'[{int(current_time)}] Overall W: {int(overall_net):5}, Plug W: {int(plug_consumption):5}, Secs since on: {int(time_since_on):5}, Secs since off: {int(time_since_off):5}, Switch count: {switchcount:5}, Plug on?: {is_on:5} ==> {threshold_string} {action_string}')
+            print(f'[{int(current_time)}] Overall W: {int(overall_net):5}, Plug W: {int(plug_consumption):5}, Secs since on: {int(time_since_on):5}, Secs since off: {int(time_since_off):5}, Switch count: {switchcount:5}, Plug on?: {is_on:5} ==> {threshold_string} {action_string}')
+        except SmartDeviceException as ex:
+            currentTime = int(time.time())
+            print(f'[{int(current_time)}] Plug communication error ({ex}). Has it been disconnected?')
         time.sleep(check_interval - (time.time() % check_interval))
 
 if __name__ == "__main__":
