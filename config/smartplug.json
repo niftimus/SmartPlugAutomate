@@ -1,0 +1,8 @@
+{
+    "plug_address": "10.1.2.12",
+    "solar_monitor_url": "http://10.1.2.3/production.json",
+    "min_power": 100,
+    "min_off": 30,
+    "min_on": 1,
+    "check_interval": 5
+}
