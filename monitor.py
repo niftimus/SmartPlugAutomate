@@ -3,8 +3,13 @@ import asyncio
 import time
 import asyncclick as click
 from kasa import SmartPlug, SmartDeviceException
+from flask import Flask
+import threading
 
+app = Flask(__name__)
 click.anyio_backend = "asyncio"
+msg = ""
+
 
 async def getReading(plug):
     """Get updated reading"""
@@ -24,12 +29,20 @@ async def getReading(plug):
 async def main(ctx, address,period):
     """Main monitoring loop"""
     plug = SmartPlug(address)
+    global msg
     print(
         f'"Timestamp","Voltage (V)", "Current (A)", "Power (kW)", "Energy (kWh)"')
     while True:
         reading = await getReading(plug)
         print(reading)
+
+        msg=reading
         time.sleep(period - (time.time() % period))
 
+@app.route('/')
+def hello():
+    return msg
+
 if __name__ == "__main__":
+    threading.Thread(target=app.run).start()
     main()
