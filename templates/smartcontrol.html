@@ -1,40 +1,48 @@
 <html>
 <head>
-<title>SmartPlugAutomate</title>
+    <title>SmartPlugAutomate</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body>
-    <div class="divTable">
-<div class="divTableBody">
-<div class="divTableRow">
-<div class="divTableCell"><strong>IP Address</strong></div>
-<div class="divTableCell">{{plug_address}}</div>
-</div>
-<div class="divTableRow">
-<div class="divTableCell"><strong>Monitoring period</strong> </div>
-<div class="divTableCell">{{monitoring_period}}</div>
-</div>
-<div class="divTableRow">
-<div class="divTableCell">Timestamp</div>
-<div class="divTableCell">{{plugstatus["timestamp"]}}</div>
-</div>
-<div class="divTableRow">
-<div class="divTableCell">Voltage</div>
-<div class="divTableCell">{{plugstatus["voltage"]}}</div>
-</div>
-<div class="divTableRow">
-<div class="divTableCell">Current</div>
-<div class="divTableCell">{{plugstatus["current"]}}</div>
-</div>
-<div class="divTableRow">
-<div class="divTableCell">Power</div>
-<div class="divTableCell">{{plugstatus["power"]}}</div>
-</div>
-<div class="divTableRow">
-<div class="divTableCell">Energy </div>
-<div class="divTableCell">{{plugstatus["energy"]}}</div>
-</div>
-</div>
-</div>
+<div class="divTable">
+    <div class="divTableBody">
+        <div class="divTableRow">
+            <div class="divTableCell"><strong>IP Address</strong></div>
+            <div class="divTableCell">{{plug_address}}</div>
+        </div>
+        <div class="divTableRow">
+            <div class="divTableCell"><strong>Check interval</strong></div>
+            <div class="divTableCell">{{check_interval}}</div>
+        </div>
+        <div class="divTableRow">
+            <div class="divTableCell">Timestamp</div>
+            <div class="divTableCell">{{timestamp}}</div>
+        </div>
+        <div class="divTableRow">
+            <div class="divTableCell">Overall net</div>
+            <div class="divTableCell">{{overall_net}}</div>
+        </div>
+        <div class="divTableRow">
+            <div class="divTableCell">Plug consumption</div>
+            <div class="divTableCell">{{plug_consumption}}</div>
+        </div>
+        <div class="divTableRow">
+            <div class="divTableCell">Is plug on?</div>
+            <div class="divTableCell">{{is_on}}</div>
+        </div>
+                <div class="divTableRow">
+            <div class="divTableCell">Min on</div>
+            <div class="divTableCell">{{min_on}}</div>
+        </div>
+                <div class="divTableRow">
+            <div class="divTableCell">Min off</div>
+            <div class="divTableCell">{{min_off}}</div>
+        </div>
+                </div>
+                <div class="divTableRow">
+            <div class="divTableCell">Min power</div>
+            <div class="divTableCell">{{min_power}}</div>
+        </div>
+    </div>
 </body>
 </html>
