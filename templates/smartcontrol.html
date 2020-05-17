@@ -1,0 +1,40 @@
+<html>
+<head>
+<title>SmartPlugAutomate</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+    <div class="divTable">
+<div class="divTableBody">
+<div class="divTableRow">
+<div class="divTableCell"><strong>IP Address</strong></div>
+<div class="divTableCell">{{plug_address}}</div>
+</div>
+<div class="divTableRow">
+<div class="divTableCell"><strong>Monitoring period</strong> </div>
+<div class="divTableCell">{{monitoring_period}}</div>
+</div>
+<div class="divTableRow">
+<div class="divTableCell">Timestamp</div>
+<div class="divTableCell">{{plugstatus["timestamp"]}}</div>
+</div>
+<div class="divTableRow">
+<div class="divTableCell">Voltage</div>
+<div class="divTableCell">{{plugstatus["voltage"]}}</div>
+</div>
+<div class="divTableRow">
+<div class="divTableCell">Current</div>
+<div class="divTableCell">{{plugstatus["current"]}}</div>
+</div>
+<div class="divTableRow">
+<div class="divTableCell">Power</div>
+<div class="divTableCell">{{plugstatus["power"]}}</div>
+</div>
+<div class="divTableRow">
+<div class="divTableCell">Energy </div>
+<div class="divTableCell">{{plugstatus["energy"]}}</div>
+</div>
+</div>
+</div>
+</body>
+</html>
