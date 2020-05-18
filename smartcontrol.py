@@ -5,7 +5,7 @@ import asyncclick as click
 from kasa import SmartPlug, SmartDeviceException
 import requests
 import json
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import threading
 
 app = Flask(__name__)
@@ -20,6 +20,7 @@ gv_overall_production = 0
 gv_overall_consumption = 0
 gv_min_on = 0
 gv_min_off = 0
+gv_is_smartcontrol_enabled= True
 
 
 def CommandWithConfigFile(config_file_param_name):
@@ -53,7 +54,7 @@ async def main(ctx, config, plug_address, solar_monitor_url, check_interval, min
     plug = SmartPlug(plug_address)
     last_ontime = time.time()
     last_offtime = last_ontime
-    global gv_plug_address, gv_check_interval, gv_overall_net, gv_switchcount, gv_is_on, gv_overall_production, gv_overall_consumption, gv_current_time, gv_min_off, gv_min_on, gv_min_power
+    global gv_plug_address, gv_check_interval, gv_overall_net, gv_switchcount, gv_is_on, gv_overall_production, gv_overall_consumption, gv_current_time, gv_min_off, gv_min_on, gv_min_power, gv_is_smartcontrol_enabled
     gv_min_off= min_off
     gv_min_on = min_on
     gv_switchcount = 0
@@ -77,45 +78,54 @@ async def main(ctx, config, plug_address, solar_monitor_url, check_interval, min
             time_since_off = gv_current_time - last_offtime
             time_since_on = gv_current_time - last_ontime
 
-            if (gv_is_on):
-                if ((gv_overall_net + gv_plug_consumption) >= min_power):
-                    threshold_string = "Overall is above minimum."
-                    action_string = "Leaving on."
-                else:
-                    threshold_string = "Overall is under minimum."
-                    if (time_since_on < min_on):
+            if (gv_is_smartcontrol_enabled):
+                if (gv_is_on):
+                    if ((gv_overall_net + gv_plug_consumption) >= min_power):
+                        threshold_string = "Overall is above minimum."
                         action_string = "Leaving on."
                     else:
-                        action_string = "Turning off."
-                        await plug.turn_off()
-                        last_offtime = gv_current_time
-                        gv_switchcount += 1
-            else:
-                if ((gv_overall_net + gv_plug_consumption) >= min_power):
-                    threshold_string = "Overall is above minimum."
-                    if (time_since_off < min_off):
-                        action_string = "Leaving off."
-                    else:
-                        action_string = "Turning on."
-                        last_ontime = gv_current_time
-                        await plug.turn_on()
-                        gv_switchcount += 1
+                        threshold_string = "Overall is under minimum."
+                        if (time_since_on < min_on):
+                            action_string = "Leaving on."
+                        else:
+                            action_string = "Turning off."
+                            await plug.turn_off()
+                            last_offtime = gv_current_time
+                            gv_switchcount += 1
                 else:
-                    threshold_string = "Overall is under minimum."
-                    action_string = "Leaving off."
+                    if ((gv_overall_net + gv_plug_consumption) >= min_power):
+                        threshold_string = "Overall is above minimum."
+                        if (time_since_off < min_off):
+                            action_string = "Leaving off."
+                        else:
+                            action_string = "Turning on."
+                            last_ontime = gv_current_time
+                            await plug.turn_on()
+                            gv_switchcount += 1
+                    else:
+                        threshold_string = "Overall is under minimum."
+                        action_string = "Leaving off."
 
             print(
-                f'[{int(gv_current_time)}] Overall W: {int(gv_overall_net):5}, Plug W: {int(gv_plug_consumption):5}, Secs since on: {int(time_since_on):5}, Secs since off: {int(time_since_off):5}, Switch count: {gv_switchcount:5}, Plug on?: {gv_is_on:5} ==> {threshold_string} {action_string}')
+                f'[{int(gv_current_time)}] {gv_is_smartcontrol_enabled}, Overall W: {int(gv_overall_net):5},Min power W:{int(gv_min_power):5}, Plug W: {int(gv_plug_consumption):5}, Secs since on: {int(time_since_on):5}, Secs since off: {int(time_since_off):5}, Switch count: {gv_switchcount:5}, Plug on?: {gv_is_on:5} ==> {threshold_string} {action_string}')
         except SmartDeviceException as ex:
             print(f'[{int(gv_current_time)}] Plug communication error ({ex}). Has it been disconnected?')
         time.sleep(check_interval - (time.time() % check_interval))
 
 
-@app.route('/')
-def monitor():
+@app.route('/', methods=['GET','POST'])
+def webInterface():
+    error = None
+    global gv_min_power, gv_is_smartcontrol_enabled
+    if request.method == 'POST':
+        gv_min_power = request.form['newMinPower']
+        if request.form['smartcontrolEnabled']:
+            gv_is_smartcontrol_enabled = True
+        else:
+            gv_is_smartcontrol_enabled = False
     return render_template('smartcontrol.html', plug_address=gv_plug_address, check_interval=gv_check_interval,
                            timestamp=gv_current_time, overall_net=gv_overall_net, plug_consumption=gv_plug_consumption,
-                           is_on=gv_is_on, min_on = gv_min_on, min_off = gv_min_off, min_power=gv_min_power)
+                           is_on=gv_is_on, min_on = gv_min_on, min_off = gv_min_off, min_power=gv_min_power, smartcontrol_enabled=gv_is_smartcontrol_enabled)
 
 if __name__ == "__main__":
     threading.Thread(target=app.run).start()

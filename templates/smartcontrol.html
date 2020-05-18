@@ -2,10 +2,28 @@
 <head>
     <title>SmartPlugAutomate</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
 </head>
-<body>
+<form action="/" method="post">
 <div class="divTable">
     <div class="divTableBody">
+        <div class="divTableRow">
+            <div class="divTableCell"><strong>Smart control enabled</strong></div>
+            <div class="divTableCell"><!-- Rounded switch -->
+<label class="switch">
+  <input id = "is_smartcontrolEnabled" name = "smartcontrolEnabled" type="checkbox">
+  <span class="switchslider round"></span>
+    <script>
+        var checkBox = document.getElementById("is_smartcontrolEnabled");
+        if ("{{smartcontrol_enabled}}"=="True")
+         { checkBox.checked = True }
+         else
+         { checkBox.checked = False }
+    </script>
+
+</label></div>
+        </div>
+
         <div class="divTableRow">
             <div class="divTableCell"><strong>IP Address</strong></div>
             <div class="divTableCell">{{plug_address}}</div>
@@ -14,6 +32,10 @@
             <div class="divTableCell"><strong>Check interval</strong></div>
             <div class="divTableCell">{{check_interval}}</div>
         </div>
+
+
+
+
         <div class="divTableRow">
             <div class="divTableCell">Timestamp</div>
             <div class="divTableCell">{{timestamp}}</div>
@@ -30,19 +52,37 @@
             <div class="divTableCell">Is plug on?</div>
             <div class="divTableCell">{{is_on}}</div>
         </div>
-                <div class="divTableRow">
+        <div class="divTableRow">
             <div class="divTableCell">Min on</div>
             <div class="divTableCell">{{min_on}}</div>
         </div>
-                <div class="divTableRow">
+        <div class="divTableRow">
             <div class="divTableCell">Min off</div>
             <div class="divTableCell">{{min_off}}</div>
         </div>
-                </div>
-                <div class="divTableRow">
-            <div class="divTableCell">Min power</div>
-            <div class="divTableCell">{{min_power}}</div>
+    </div>
+    <div class="divTableRow">
+        <div class="divTableCell">Min power</div>
+        <div class="divTableCell">
+            <div>{{min_power}} (New value: <span id="newMinPower">{{min_power}}</span>)</div>
+            <div class="slidecontainer">
+                <input name="newMinPower" type="range" min="1" max="2400" value="{{min_power}}" class="slider" id="myRange">
+                    <script>
+    var slider = document.getElementById("myRange");
+var output = document.getElementById("newMinPower");
+output.innerHTML = slider.value; // Display the default slider value
+
+// Update the current slider value (each time you drag the slider handle)
+slider.oninput = function() {
+  output.innerHTML = this.value;
+}
+
+    </script>
+            </div>
         </div>
     </div>
+</div>
+     <input type="submit" value="Update values">
+</form>
 </body>
 </html>
