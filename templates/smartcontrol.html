@@ -57,13 +57,48 @@
             <div class="divTableCell">Is plug on?</div>
             <div class="divTableCell">{{smartcontrol.is_on}}</div>
         </div>
+                <div class="divTableRow">
+            <div class="divTableCell">Switch count</div>
+            <div class="divTableCell">{{smartcontrol.switch_count}}</div>
+        </div>
         <div class="divTableRow">
             <div class="divTableCell">Min on</div>
-            <div class="divTableCell">{{smartcontrol.min_on}}</div>
+            <div class="divTableCell">
+                        <div>{{smartcontrol.min_on}} (New value: <span id="newMinOn">{{smartcontrol.min_on}}</span>)</div>
+            <div class="slidecontainer">
+                <input name="newMinOn" type="range" min="1" max="120" value="{{smartcontrol.min_on}}" class="slider" id="range_min_on">
+                    <script>
+    var slider_min_on = document.getElementById("range_min_on");
+var output_min_on = document.getElementById("newMinOn");
+output_min_on.innerHTML = slider_min_on.value; // Display the default slider value
+
+// Update the current slider value (each time you drag the slider handle)
+slider_min_on.oninput = function() {
+  output_min_on.innerHTML = this.value;
+}
+
+    </script>
+            </div>
+
+            </div>
         </div>
         <div class="divTableRow">
             <div class="divTableCell">Min off</div>
-            <div class="divTableCell">{{smartcontrol.min_off}}</div>
+            <div class="divTableCell">             <div>{{smartcontrol.min_off}} (New value: <span id="newMinOff">{{smartcontrol.min_off}}</span>)</div>
+            <div class="slidecontainer">
+                <input name="newMinOff" type="range" min="1" max="120" value="{{smartcontrol.min_off}}" class="slider" id="range_min_off">
+                    <script>
+    var slider_min_off = document.getElementById("range_min_off");
+var output_min_off = document.getElementById("newMinOff");
+output_min_off.innerHTML = slider_min_off.value; // Display the default slider value
+
+// Update the current slider value (each time you drag the slider handle)
+slider_min_off.oninput = function() {
+  output_min_off.innerHTML = this.value;
+}
+
+    </script>
+            </div></div>
         </div>
     </div>
     <div class="divTableRow">
