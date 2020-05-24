@@ -33,6 +33,14 @@
   width: 100%; /* Width of the outside container */
 }
 
+.background-on {
+background-color: #DFEED7;
+}
+
+.background-off {
+background-color: #ECE6E6;
+}
+
 /* The slider itself */
 .slider {
   -webkit-appearance: none;  /* Override default CSS styles */

@@ -3,6 +3,7 @@ import asyncio
 import time
 import asyncclick as click
 from kasa import SmartPlug, SmartDeviceException
+from datetime import datetime
 import requests
 import json
 from flask import Flask, render_template, request
@@ -10,6 +11,11 @@ import threading
 
 app = Flask(__name__)
 click.anyio_backend = "asyncio"
+LARGE_NUMBER = 9999
+
+@app.template_filter('ctime')
+def timectime(s):
+    return datetime.fromtimestamp(s).strftime('%Y-%m-%d %H:%M:%S') # datetime.datetime.fromtimestamp(s)
 
 class SmartControl:
     plug_address = ""
@@ -20,11 +26,15 @@ class SmartControl:
     is_on = None
     overall_production = 0
     overall_consumption = 0
-    min_on = 0
-    min_off = 0
-    min_power = 0
+    min_on = LARGE_NUMBER
+    min_off = LARGE_NUMBER
+    min_power = LARGE_NUMBER
     is_smartcontrol_enabled = True
     current_time = 0
+    message = ""
+    default_min_power = LARGE_NUMBER
+    default_min_off = LARGE_NUMBER
+    default_min_on = LARGE_NUMBER
 
 gv_smartcontrol = SmartControl()
 
@@ -64,6 +74,9 @@ async def main(ctx, config, plug_address, solar_monitor_url, check_interval, min
     gv_smartcontrol.min_on = min_on
     gv_smartcontrol.min_off = min_off
     gv_smartcontrol.switch_count = 0
+    gv_smartcontrol.default_min_power = min_power
+    gv_smartcontrol.default_min_off = min_off
+    gv_smartcontrol.default_min_on = min_on
 
     plug = SmartPlug(plug_address)
     last_ontime = time.time()
@@ -120,6 +133,7 @@ async def main(ctx, config, plug_address, solar_monitor_url, check_interval, min
                 else:
                     action_string = "Leaving Off."
 
+            gv_smartcontrol.message = f'{threshold_string} {action_string}'
             print(
                 f'[{int(gv_smartcontrol.current_time)}] {gv_smartcontrol.is_smartcontrol_enabled}, Overall W: {int(gv_smartcontrol.overall_net):5},Min power W:{int(gv_smartcontrol.min_power):5}, Plug W: {int(gv_smartcontrol.plug_consumption):5}, Secs since on: {int(time_since_on):5}, Secs since off: {int(time_since_off):5}, Switch count: {gv_smartcontrol.switch_count:5}, Plug on?: {gv_smartcontrol.is_on:5} ==> {threshold_string} {action_string}')
         except SmartDeviceException as ex:
@@ -142,5 +156,5 @@ def webInterface():
     return render_template('smartcontrol.html', smartcontrol=gv_smartcontrol)
 
 if __name__ == "__main__":
-    threading.Thread(target=app.run()).start()
+    threading.Thread(target=app.run).start()
     main()

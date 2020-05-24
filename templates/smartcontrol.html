@@ -5,17 +5,17 @@
 
 </head>
 <form action="/" method="post">
-<div class="divTable">
-    <div class="divTableBody">
-        <div class="divTableRow">
-            <div class="divTableCell"><strong>Smart control enabled</strong></div>
-            <div class="divTableCell"><!-- Rounded switch -->
+    <div class="divTable">
+        <div class="divTableBody">
+            <div class="divTableRow">
+                <div class="divTableCell"><strong>Smart control enabled</strong></div>
+                <div class="divTableCell"><!-- Rounded switch -->
 
-                <input type="radio" id="off" name="is_smartcontrolEnabled" value="off">
-<label for="Off">Off</label>
-<input type="radio" id="on" name="is_smartcontrolEnabled" value="on">
-<label for="On">On</label>
-<script>
+                    <input type="radio" id="off" name="is_smartcontrolEnabled" value="off">
+                    <label for="Off">Off</label>
+                    <input type="radio" id="on" name="is_smartcontrolEnabled" value="on">
+                    <label for="On">On</label>
+                    <script>
     on_radio = document.getElementById("on");
     off_radio = document.getElementById("off");
     if("{{smartcontrol.is_smartcontrol_enabled}}"=="True")
@@ -25,49 +25,59 @@
     {
     off_radio.checked = true;
     }
-</script>
+
+                    </script>
                 </div>
-        </div>
+            </div>
+            <div class="divTableRow">
+                <div class="divTableCell"><strong>IP Address</strong></div>
+                <div class="divTableCell">{{smartcontrol.plug_address}}</div>
+            </div>
+            <div class="divTableRow">
+                <div class="divTableCell"><strong>Check interval</strong></div>
+                <div class="divTableCell">{{smartcontrol.check_interval}}</div>
+            </div>
+            <div class="divTableRow">
+                <div class="divTableCell">Timestamp</div>
+                <div class="divTableCell">{{smartcontrol.current_time | ctime}}</div>
+            </div>
+            <div class="divTableRow">
+                <div class="divTableCell">Is plug on?</div>
+                <div class="divTableCell" id="is_on">{{smartcontrol.is_on}}</div>
+                <script>
+                    var myCell = document.getElementById("is_on");
+                    if ("{{smartcontrol.is_on}}"=="True") {
+                    myCell.classList.add("background-on");
+                    } else {
+                    myCell.classList.add("background-off");
+                    }
 
-        <div class="divTableRow">
-            <div class="divTableCell"><strong>IP Address</strong></div>
-            <div class="divTableCell">{{smartcontrol.plug_address}}</div>
-        </div>
-        <div class="divTableRow">
-            <div class="divTableCell"><strong>Check interval</strong></div>
-            <div class="divTableCell">{{smartcontrol.check_interval}}</div>
-        </div>
-
-
-
-
-        <div class="divTableRow">
-            <div class="divTableCell">Timestamp</div>
-            <div class="divTableCell">{{smartcontrol.current_time}}</div>
-        </div>
-        <div class="divTableRow">
-            <div class="divTableCell">Overall net</div>
-            <div class="divTableCell">{{smartcontrol.overall_net}}</div>
-        </div>
-        <div class="divTableRow">
-            <div class="divTableCell">Plug consumption</div>
-            <div class="divTableCell">{{smartcontrol.plug_consumption}}</div>
-        </div>
-        <div class="divTableRow">
-            <div class="divTableCell">Is plug on?</div>
-            <div class="divTableCell">{{smartcontrol.is_on}}</div>
-        </div>
-                <div class="divTableRow">
-            <div class="divTableCell">Switch count</div>
-            <div class="divTableCell">{{smartcontrol.switch_count}}</div>
-        </div>
-        <div class="divTableRow">
-            <div class="divTableCell">Min on</div>
-            <div class="divTableCell">
-                        <div>{{smartcontrol.min_on}} (New value: <span id="newMinOn">{{smartcontrol.min_on}}</span>)</div>
-            <div class="slidecontainer">
-                <input name="newMinOn" type="range" min="1" max="120" value="{{smartcontrol.min_on}}" class="slider" id="range_min_on">
-                    <script>
+                </script>
+            </div>
+            <div class="divTableRow">
+                <div class="divTableCell">Last message</div>
+                <div class="divTableCell">{{smartcontrol.message}}</div>
+            </div>
+            <div class="divTableRow">
+                <div class="divTableCell">Overall net</div>
+                <div class="divTableCell">{{smartcontrol.overall_net}}</div>
+            </div>
+            <div class="divTableRow">
+                <div class="divTableCell">Plug consumption</div>
+                <div class="divTableCell">{{smartcontrol.plug_consumption}}</div>
+            </div>
+            <div class="divTableRow">
+                <div class="divTableCell">Switch count</div>
+                <div class="divTableCell">{{smartcontrol.switch_count}}</div>
+            </div>
+            <div class="divTableRow">
+                <div class="divTableCell">Min on</div>
+                <div class="divTableCell">
+                    <div>{{smartcontrol.min_on}} (New value: <span id="newMinOn">{{smartcontrol.min_on}}</span>)</div>
+                    <div class="slidecontainer">
+                        <input name="newMinOn" type="range" min="1" max="120" value="{{smartcontrol.min_on}}"
+                               class="slider" id="range_min_on">
+                        <script>
     var slider_min_on = document.getElementById("range_min_on");
 var output_min_on = document.getElementById("newMinOn");
 output_min_on.innerHTML = slider_min_on.value; // Display the default slider value
@@ -77,17 +87,20 @@ slider_min_on.oninput = function() {
   output_min_on.innerHTML = this.value;
 }
 
-    </script>
-            </div>
+                        </script>
+                    </div>
 
+                </div>
             </div>
-        </div>
-        <div class="divTableRow">
-            <div class="divTableCell">Min off</div>
-            <div class="divTableCell">             <div>{{smartcontrol.min_off}} (New value: <span id="newMinOff">{{smartcontrol.min_off}}</span>)</div>
-            <div class="slidecontainer">
-                <input name="newMinOff" type="range" min="1" max="120" value="{{smartcontrol.min_off}}" class="slider" id="range_min_off">
-                    <script>
+            <div class="divTableRow">
+                <div class="divTableCell">Min off</div>
+                <div class="divTableCell">
+                    <div>{{smartcontrol.min_off}} (New value: <span id="newMinOff">{{smartcontrol.min_off}}</span>)
+                    </div>
+                    <div class="slidecontainer">
+                        <input name="newMinOff" type="range" min="1" max="120" value="{{smartcontrol.min_off}}"
+                               class="slider" id="range_min_off">
+                        <script>
     var slider_min_off = document.getElementById("range_min_off");
 var output_min_off = document.getElementById("newMinOff");
 output_min_off.innerHTML = slider_min_off.value; // Display the default slider value
@@ -97,16 +110,22 @@ slider_min_off.oninput = function() {
   output_min_off.innerHTML = this.value;
 }
 
-    </script>
-            </div></div>
+
+
+
+                        </script>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="divTableRow">
-        <div class="divTableCell">Min power</div>
-        <div class="divTableCell">
-            <div>{{smartcontrol.min_power}} (New value: <span id="newMinPower">{{smartcontrol.min_power}}</span>)</div>
-            <div class="slidecontainer">
-                <input name="newMinPower" type="range" min="1" max="2400" value="{{smartcontrol.min_power}}" class="slider" id="myRange">
+        <div class="divTableRow">
+            <div class="divTableCell">Min power</div>
+            <div class="divTableCell">
+                <div>{{smartcontrol.min_power}} (New value: <span id="newMinPower">{{smartcontrol.min_power}}</span>)
+                </div>
+                <div class="slidecontainer">
+                    <input name="newMinPower" type="range" min="1" max="2400" value="{{smartcontrol.min_power}}"
+                           class="slider" id="myRange">
                     <script>
     var slider = document.getElementById("myRange");
 var output = document.getElementById("newMinPower");
@@ -117,12 +136,24 @@ slider.oninput = function() {
   output.innerHTML = this.value;
 }
 
-    </script>
+
+
+
+                    </script>
+                </div>
             </div>
         </div>
+        <script>
+    function resetValues() {
+  document.getElementById("newMinPower").value="{{smartcontrol.default_min_power}}";
+  document.getElementById("newMinOn").value="{{smartcontrol.default_min_on}}";
+  document.getElementById("newMinOff").value="{{smartcontrol.default_min_off}}";
+}
+        </script>
+        <input type="submit" value="Update values" id="btn_update">
+
     </div>
-</div>
-     <input type="submit" value="Update values">
 </form>
+<button type="submit" value="Reset Defaults" id="btn_reset" onclick="resetValues()">
 </body>
 </html>
