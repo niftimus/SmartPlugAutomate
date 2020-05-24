@@ -4,5 +4,6 @@
     "min_power": 1700,
     "min_off": 60,
     "min_on": 60,
-    "check_interval": 5
+    "check_interval": 5,
+    "web_port": 5001
 }

@@ -53,11 +53,10 @@ def CommandWithConfigFile(config_file_param_name):
 @click.option('--min_on', default=60, help='Minimum on period in seconds.', type=int, required=True)
 @click.option('--check_interval', default=5, help='Check interval in seconds.', type=int, required=True)
 @click.option('--config', type=click.Path(), help='Path to config file name (optional).', required=False)
-@click.option('--web_port', default=5000, help='Web port.', required=True)
+@click.option('--web_port', default=5000, help='Web port.', required=False)
 @click.pass_context
 async def main(ctx, config, plug_address, solar_monitor_url, check_interval, min_power, min_off, min_on, web_port):
     """Main control loop"""
-    threading.Thread(target=app.run(port=web_port)).start()
     global gv_smartcontrol
     gv_smartcontrol.plug_address= plug_address
     gv_smartcontrol.check_interval=check_interval
@@ -143,4 +142,5 @@ def webInterface():
     return render_template('smartcontrol.html', smartcontrol=gv_smartcontrol)
 
 if __name__ == "__main__":
+    threading.Thread(target=app.run()).start()
     main()
