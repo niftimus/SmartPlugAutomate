@@ -8,14 +8,18 @@ import requests
 import json
 from flask import Flask, render_template, request
 import threading
+import atexit
 
-app = Flask(__name__)
 click.anyio_backend = "asyncio"
 LARGE_NUMBER = 9999
+POOL_TIME = 300 #Seconds
 
-@app.template_filter('ctime')
-def timectime(s):
-    return datetime.fromtimestamp(s).strftime('%Y-%m-%d %H:%M:%S') # datetime.datetime.fromtimestamp(s)
+# variables that are accessible from anywhere
+commonDataStruct = {}
+# lock to control access to variable
+dataLock = threading.Lock()
+# thread handler
+yourThread = threading.Thread()
 
 class SmartControl:
     plug_address = ""
@@ -52,8 +56,7 @@ def CommandWithConfigFile(config_file_param_name):
 
     return CustomCommandClass
 
-
-@click.command(cls=CommandWithConfigFile('config'))
+@click.command(cls=CommandWithConfigFile('config'),context_settings=dict(ignore_unknown_options=True,allow_extra_args=True))
 @click.option('--plug_address', default="10.1.2.12", help='IP address of Smart Plug device.', type=str, required=True)
 @click.option('--solar_monitor_url', default="http://10.1.2.3/production.json", help='URL of Solar Monitor device.',
               type=str, required=True)
@@ -63,11 +66,11 @@ def CommandWithConfigFile(config_file_param_name):
 @click.option('--min_on', default=60, help='Minimum on period in seconds.', type=int, required=True)
 @click.option('--check_interval', default=5, help='Check interval in seconds.', type=int, required=True)
 @click.option('--config', type=click.Path(), help='Path to config file name (optional).', required=False)
-@click.option('--web_port', default=5000, help='Web port.', required=False)
 @click.pass_context
-async def main(ctx, config, plug_address, solar_monitor_url, check_interval, min_power, min_off, min_on, web_port):
+async def main(ctx, config, plug_address, solar_monitor_url, check_interval, min_power, min_off, min_on):
     """Main control loop"""
     global gv_smartcontrol
+
     gv_smartcontrol.plug_address= plug_address
     gv_smartcontrol.check_interval=check_interval
     gv_smartcontrol.min_power=min_power
@@ -137,9 +140,56 @@ async def main(ctx, config, plug_address, solar_monitor_url, check_interval, min
             print(
                 f'[{int(gv_smartcontrol.current_time)}] {gv_smartcontrol.is_smartcontrol_enabled}, Overall W: {int(gv_smartcontrol.overall_net):5},Min power W:{int(gv_smartcontrol.min_power):5}, Plug W: {int(gv_smartcontrol.plug_consumption):5}, Secs since on: {int(time_since_on):5}, Secs since off: {int(time_since_off):5}, Switch count: {gv_smartcontrol.switch_count:5}, Plug on?: {gv_smartcontrol.is_on:5} ==> {threshold_string} {action_string}')
         except SmartDeviceException as ex:
-            print(f'[{int(gv_current_time)}] Plug communication error ({ex}). Has it been disconnected?')
+            print(f'[{int(gv_smartcontrol.current_time)}] Plug communication error ({ex}). Has it been disconnected?')
         time.sleep(gv_smartcontrol.check_interval - (time.time() % gv_smartcontrol.check_interval))
 
+def run_main(loop):
+    asyncio.set_event_loop(loop)
+    #loop.run_until_complete(main())
+    main()
+
+def create_app():
+    app = Flask(__name__)
+
+    def interrupt():
+        global yourThread
+        yourThread.cancel()
+
+    def doStuff():
+        global commonDataStruct
+        global yourThread
+        # with dataLock:
+        # Do your stuff with commonDataStruct Here
+
+        # Set the next thread to happen
+        #yourThread = threading.Thread(target=main)
+        loop = asyncio.new_event_loop()
+        yourThread = threading.Thread(target=run_main, args=(loop,))
+        yourThread.start()
+        #asyncio.run(main2())
+
+    def doStuffStart():
+        # Do initialisation stuff here
+        global yourThread
+        # Create your thread
+        #yourThread = threading.Thread(target=main)
+        loop = asyncio.new_event_loop()
+        yourThread = threading.Thread(target=run_main, args=(loop,))
+        yourThread.start()
+        #asyncio.run(main2())
+
+    # Initiate
+    doStuffStart()
+
+    # When you kill Flask (SIGTERM), clear the trigger for the next thread
+    atexit.register(interrupt)
+    return app
+
+app = create_app()
+
+@app.template_filter('ctime')
+def timectime(s):
+    return datetime.fromtimestamp(s).strftime('%Y-%m-%d %H:%M:%S') # datetime.datetime.fromtimestamp(s)
 
 @app.route('/', methods=['GET','POST'])
 def webInterface():
@@ -156,5 +206,7 @@ def webInterface():
     return render_template('smartcontrol.html', smartcontrol=gv_smartcontrol)
 
 if __name__ == "__main__":
-    threading.Thread(target=app.run).start()
-    main()
+    app.run(use_reloader=False)
+
+
+

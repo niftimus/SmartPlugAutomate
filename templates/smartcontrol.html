@@ -26,6 +26,9 @@
     off_radio.checked = true;
     }
 
+
+
+
                     </script>
                 </div>
             </div>
@@ -51,6 +54,9 @@
                     } else {
                     myCell.classList.add("background-off");
                     }
+
+
+
 
                 </script>
             </div>
@@ -87,6 +93,9 @@ slider_min_on.oninput = function() {
   output_min_on.innerHTML = this.value;
 }
 
+
+
+
                         </script>
                     </div>
 
@@ -109,6 +118,9 @@ output_min_off.innerHTML = slider_min_off.value; // Display the default slider v
 slider_min_off.oninput = function() {
   output_min_off.innerHTML = this.value;
 }
+
+
+
 
 
 
@@ -139,21 +151,41 @@ slider.oninput = function() {
 
 
 
+
+
+
                     </script>
                 </div>
             </div>
         </div>
         <script>
-    function resetValues() {
-  document.getElementById("newMinPower").value="{{smartcontrol.default_min_power}}";
-  document.getElementById("newMinOn").value="{{smartcontrol.default_min_on}}";
-  document.getElementById("newMinOff").value="{{smartcontrol.default_min_off}}";
-}
+  function resetValues() {
+      document.getElementById("newMinPower").value="{{smartcontrol.default_min_power}}";
+      document.getElementById("newMinOn").value="{{smartcontrol.default_min_on}}";
+      document.getElementById("newMinOff").value="{{smartcontrol.default_min_off}}";
+      output_min_on.innerHTML = document.getElementById("newMinOn").value;
+      output_min_off.innerHTML = document.getElementById("newMinOff").value;
+      output.innerHTML = document.getElementById("newMinPower").value; // Display the default slider value
+
+      var on_radio = document.getElementById("on");
+      var off_radio = document.getElementById("off");
+      if("{{smartcontrol.is_smartcontrol_enabled}}"=="True")
+      {
+        on_radio.checked = true;
+      } else
+      {
+        off_radio.checked = true;
+      }
+
+      document.getElementById("range_min_off").value=document.getElementById("newMinOff").value;
+      document.getElementById("range_min_on").value=document.getElementById("newMinOn").value;
+      document.getElementById("myRange").value=document.getElementById("newMinPower").value;
+
+  }
         </script>
         <input type="submit" value="Update values" id="btn_update">
-
+        <button type="button" value="Reset Defaults" id="btn_reset" onclick="resetValues()">Reset Defaults</button>
     </div>
 </form>
-<button type="submit" value="Reset Defaults" id="btn_reset" onclick="resetValues()">
 </body>
 </html>
