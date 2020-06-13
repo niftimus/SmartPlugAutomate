@@ -205,8 +205,15 @@ def webInterface():
             gv_smartcontrol.is_smartcontrol_enabled = False
     return render_template('smartcontrol.html', smartcontrol=gv_smartcontrol)
 
+@click.command(cls=CommandWithConfigFile('config'),context_settings=dict(ignore_unknown_options=True,allow_extra_args=True))
+@click.option('--web_host', default="0.0.0.0", help='Host IP for web interface', type=str, required=True)
+@click.option('--web_port', default="5000", help='Port for web interface', type=str, required=True)
+@click.option('--config', type=click.Path(), help='Path to config file name (optional).', required=False)
+def cli(web_host, web_port, config):
+    app.run(host=web_host, port = web_port)
+
 if __name__ == "__main__":
-    app.run(use_reloader=False)
+    cli()
 
 
 

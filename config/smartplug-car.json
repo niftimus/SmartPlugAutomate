@@ -5,5 +5,7 @@
     "min_off": 60,
     "min_on": 60,
     "check_interval": 5,
-    "web_port": 5001
+    "web_host": "0.0.0.0",
+    "web_port": 8001
+
 }
