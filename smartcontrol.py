@@ -141,6 +141,8 @@ async def main(ctx, config, plug_address, solar_monitor_url, check_interval, min
                 f'[{int(gv_smartcontrol.current_time)}] {gv_smartcontrol.is_smartcontrol_enabled}, Overall W: {int(gv_smartcontrol.overall_net):5},Min power W:{int(gv_smartcontrol.min_power):5}, Plug W: {int(gv_smartcontrol.plug_consumption):5}, Secs since on: {int(time_since_on):5}, Secs since off: {int(time_since_off):5}, Switch count: {gv_smartcontrol.switch_count:5}, Plug on?: {gv_smartcontrol.is_on:5} ==> {threshold_string} {action_string}')
         except SmartDeviceException as ex:
             print(f'[{int(gv_smartcontrol.current_time)}] Plug communication error ({ex}). Has it been disconnected?')
+        except requests.exceptions.Timeout:
+            print('HTTP Timeout exception... will retry next cycle.')
         time.sleep(gv_smartcontrol.check_interval - (time.time() % gv_smartcontrol.check_interval))
 
 def run_main(loop):
