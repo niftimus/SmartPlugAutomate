@@ -92,7 +92,7 @@ async def main(ctx, config, plug_address, solar_monitor_url, check_interval, min
             await plug.update()
             plugRealtime = await plug.get_emeter_realtime()
             gv_smartcontrol.is_on = plug.is_on
-            r = requests.get(solar_monitor_url)
+            r = requests.get(solar_monitor_url, timeout=1)
             solar_json = r.json()
             gv_smartcontrol.overall_production = (solar_json["production"][1]["wNow"])
             gv_smartcontrol.overall_consumption = (solar_json["consumption"][0]["wNow"])
