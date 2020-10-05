@@ -1,5 +1,5 @@
 [Unit]
-Description=Smartplug charger service
+Description=SmartPlug charger service
 
 [Service]
 User=david

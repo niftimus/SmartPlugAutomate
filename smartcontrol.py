@@ -14,13 +14,10 @@ click.anyio_backend = "asyncio"
 LARGE_NUMBER = 9999
 POOL_TIME = 300 #Seconds
 
-# variables that are accessible from anywhere
-commonDataStruct = {}
-# lock to control access to variable
-dataLock = threading.Lock()
 # thread handler
 yourThread = threading.Thread()
 
+# Define SmartControl object containing variables
 class SmartControl:
     plug_address = ""
     check_interval = 0
@@ -40,6 +37,7 @@ class SmartControl:
     default_min_off = LARGE_NUMBER
     default_min_on = LARGE_NUMBER
 
+# Create SmartControl global variable
 gv_smartcontrol = SmartControl()
 
 def CommandWithConfigFile(config_file_param_name):
@@ -158,19 +156,6 @@ def create_app():
     def interrupt():
         global yourThread
         yourThread.cancel()
-
-    def doStuff():
-        global commonDataStruct
-        global yourThread
-        # with dataLock:
-        # Do your stuff with commonDataStruct Here
-
-        # Set the next thread to happen
-        #yourThread = threading.Thread(target=main)
-        loop = asyncio.new_event_loop()
-        yourThread = threading.Thread(target=run_main, args=(loop,))
-        yourThread.start()
-        #asyncio.run(main2())
 
     def doStuffStart():
         # Do initialisation stuff here
