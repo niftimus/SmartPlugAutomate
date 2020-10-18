@@ -4,17 +4,18 @@
 - Ubuntu 20.04 (64-bit): https://ubuntu.com/download/desktop
 - Anaconda: https://www.anaconda.com/products/individual
 
-##Clone the environment (replace home directory)
-`cd /home/david`
-`git clone https://github.com/niftimus/SmartPlugAutomate.git`
-
 ##Create a new python environment
 `conda create -n SmartPlugAutomate python=3.8`
 
 ##Activate the environment
 `conda activate SmartPlugAutomate`
 
+##Clone the environment (replace home directory)
+`cd /home/david`
+`git clone https://github.com/niftimus/SmartPlugAutomate.git`
+
 ##Install libraries
+`cd /home/david/SmartPlugAutomate`
 `pip install -r requirements.txt`
 
 ##Edit configuration
@@ -25,7 +26,7 @@ Edit the file config/smartplug-car.json
 - Ensure solar_monitor_url points to the URL of the Enphase monitor endpoint
 
 ##Create service
-Create a file /etc/systemd/system/smartplug-car.service:
+Create a file as root /etc/systemd/system/smartplug-car.service:
 ```
 [Unit]
 Description=SmartPlug charger (car) service
@@ -54,6 +55,10 @@ Set the service to run automatically:
 
 `sudo systemctl enable smartplug-car.service`
 
+Start the service:
+
+`sudo service smartplug-car start`
+
 Check that the service is running:
 
 `sudo service smartplug-car status`
@@ -74,3 +79,5 @@ Check that the service is running:
 Open the following in a new browser:
 
 `http://0.0.0.0:8001`
+
+The web UI should display with the latest plug status.
