@@ -1,8 +1,11 @@
-# Installing
+# Installing on Linux
+
+Clone the environment:
+`cd /home/david`
+`git clone `
 
 
 Create a new python environment:
-
 `conda create -n SmartPlugAutomate python=3.8`
 
 Activate the environment:
@@ -10,3 +13,5 @@ Activate the environment:
 
 Install libraries:
 `pip install -r requirements.txt`
+
+Deploy services:
