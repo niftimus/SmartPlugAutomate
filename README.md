@@ -47,13 +47,10 @@ Description=SmartPlug charger (car) service
 [Service]
 User=david
 
-# The configuration file application.properties should be here:
-#change this to your workspace
+# Set the working directory
 WorkingDirectory=/home/david/SmartPlugAutomate
 
-#path to executable. 
-#executable is a bash script which calls jar file
-
+# Set the path to the script
 ExecStart=/home/david/SmartPlugAutomate/go.sh --config config/smartplug-car.json
 SuccessExitStatus=143
 TimeoutStopSec=10
