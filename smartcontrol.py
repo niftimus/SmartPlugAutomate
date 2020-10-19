@@ -40,6 +40,7 @@ class SmartControl:
 # Create SmartControl global variable
 gv_smartcontrol = SmartControl()
 
+# Initialise with the configuration file
 def CommandWithConfigFile(config_file_param_name):
     class CustomCommandClass(click.Command):
         def invoke(self, ctx):
@@ -54,6 +55,7 @@ def CommandWithConfigFile(config_file_param_name):
 
     return CustomCommandClass
 
+# Run main check / control loop
 @click.command(cls=CommandWithConfigFile('config'),context_settings=dict(ignore_unknown_options=True,allow_extra_args=True))
 @click.option('--plug_address', default="10.1.2.12", help='IP address of Smart Plug device.', type=str, required=True)
 @click.option('--solar_monitor_url', default="http://10.1.2.3/production.json", help='URL of Solar Monitor device.',
@@ -83,13 +85,18 @@ async def main(ctx, config, plug_address, solar_monitor_url, check_interval, min
     last_ontime = time.time()
     last_offtime = last_ontime
 
+    # Main check / control loop (run indefinitely)
     while True:
         try:
             action_string = ""
             gv_smartcontrol.current_time = time.time()
             await plug.update()
             plugRealtime = await plug.get_emeter_realtime()
+
+            # Get plug status (on or off)
             gv_smartcontrol.is_on = plug.is_on
+
+            # Get current net Solar export from Enphase monitor API
             r = requests.get(solar_monitor_url, timeout=3)
             solar_json = r.json()
             gv_smartcontrol.overall_production = (solar_json["production"][1]["wNow"])
@@ -100,6 +107,11 @@ async def main(ctx, config, plug_address, solar_monitor_url, check_interval, min
             time_since_off = gv_smartcontrol.current_time - last_offtime
             time_since_on = gv_smartcontrol.current_time - last_ontime
 
+            # Decide whether to turn the plug off / on based on:
+            # - Current state
+            # - Current power available
+            # - Expected power usage
+            # - On / off grace periods
             if (gv_smartcontrol.is_smartcontrol_enabled):
                 if (gv_smartcontrol.is_on):
                     if ((gv_smartcontrol.overall_net + gv_smartcontrol.plug_consumption) >= gv_smartcontrol.min_power):
@@ -134,15 +146,19 @@ async def main(ctx, config, plug_address, solar_monitor_url, check_interval, min
                 else:
                     action_string = "Leaving Off."
 
+            # Print log messages to console
             gv_smartcontrol.message = f'{threshold_string} {action_string}'
             print(
                 f'[{int(gv_smartcontrol.current_time)}] {gv_smartcontrol.is_smartcontrol_enabled}, Overall W: {int(gv_smartcontrol.overall_net):5},Min power W:{int(gv_smartcontrol.min_power):5}, Plug W: {int(gv_smartcontrol.plug_consumption):5}, Secs since on: {int(time_since_on):5}, Secs since off: {int(time_since_off):5}, Switch count: {gv_smartcontrol.switch_count:5}, Plug on?: {gv_smartcontrol.is_on:5} ==> {threshold_string} {action_string}')
+        # Print errors and keep trying if the plug times out or goes offline
         except SmartDeviceException as ex:
             print(f'[{int(gv_smartcontrol.current_time)}] Plug communication error ({ex}). Has it been disconnected?')
         except requests.exceptions.Timeout:
             print('HTTP Timeout exception... will retry next cycle.')
         except requests.exceptions.ConnectionError:
             print('HTTP Connection Error... will retry next cycle.')
+
+        # Wait additional time until the next check cycle
         time.sleep(gv_smartcontrol.check_interval - (time.time() % gv_smartcontrol.check_interval))
 
 def run_main(loop):
@@ -154,18 +170,17 @@ def create_app():
     app = Flask(__name__)
 
     def interrupt():
+        # Respond to kill requests
         global yourThread
         yourThread.cancel()
 
     def doStuffStart():
         # Do initialisation stuff here
         global yourThread
-        # Create your thread
-        #yourThread = threading.Thread(target=main)
+        # Run check / control thread
         loop = asyncio.new_event_loop()
         yourThread = threading.Thread(target=run_main, args=(loop,))
         yourThread.start()
-        #asyncio.run(main2())
 
     # Initiate
     doStuffStart()
@@ -199,6 +214,7 @@ def webInterface():
 @click.option('--web_port', default="5000", help='Port for web interface', type=str, required=True)
 @click.option('--config', type=click.Path(), help='Path to config file name (optional).', required=False)
 def cli(web_host, web_port, config):
+    # Run the web UI
     app.run(host=web_host, port = web_port)
 
 if __name__ == "__main__":

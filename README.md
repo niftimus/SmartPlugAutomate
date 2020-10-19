@@ -1,32 +1,40 @@
 # Installing on Linux
 
 ##Pre-requisites
+
+###Get software
 - Ubuntu 20.04 (64-bit): https://ubuntu.com/download/desktop
 - Anaconda: https://www.anaconda.com/products/individual
 
-##Create a new python environment
+###Create a new python environment
 `conda create -n SmartPlugAutomate python=3.8`
 
-##Activate the environment
+###Activate the environment
 `conda activate SmartPlugAutomate`
 
-##Clone the environment (replace home directory)
+###Clone the environment (replace home directory)
 `cd /home/david`
 `git clone https://github.com/niftimus/SmartPlugAutomate.git`
 
-##Install libraries
+###Install libraries
 `cd /home/david/SmartPlugAutomate`
 `pip install -r requirements.txt`
 
-##Edit configuration
+##Configuration
+
+###Edit configuration
 
 Edit the file config/smartplug-car.json
-- Ensure plug_address points to the IP of the TP-Link smartplug
-- Ensure min_power is set to the expected energy consumption of the plug
-- Ensure solar_monitor_url points to the URL of the Enphase monitor endpoint
+- Ensure _plug_address_ points to the IP of the TP-Link smartplug (e.g. 10.1.2.13)
+- Ensure _solar_monitor_url_ points to the URL of the Enphase monitor endpoint (e.g. http://10.1.2.3/production.json)
+- Set _min_power_ is set to the expected energy consumption of the connected device
+- Set _min_off_ to the minimum number of seconds to remain off (grace period)
+- Set _min_on_ to the minimum number of seconds to remain on (grace period)
+- Set _check_interval_ to the number of seconds for each check interval
+- Set _web_port_ to the port number of the UI interface
 
-##Create service
-Create a file as root /etc/systemd/system/smartplug-car.service:
+###Create service
+Create a file as root /etc/systemd/system/smartplug-car.service (replace home directory as required):
 ```
 [Unit]
 Description=SmartPlug charger (car) service
@@ -51,9 +59,11 @@ RestartSec=10
 WantedBy=multi-user.target
 ```
 
-Set the service to run automatically:
+Set the service to run automatically on startup:
 
 `sudo systemctl enable smartplug-car.service`
+
+##Running
 
 Start the service:
 
@@ -72,12 +82,13 @@ Check that the service is running:
    CGroup: /system.slice/smartplug-car.service
            ├─ 935 /bin/bash /home/david/SmartPlugAutomate/go.sh --config config/smartplug-car.jso
            └─1235 python smartcontrol.py --config config/smartplug-car.json
- ...
 ```
 
-##Log in to the web UI
-Open the following in a new browser:
+##Usage
+
+Log in to the web UI:
 
 `http://0.0.0.0:8001`
 
 The web UI should display with the latest plug status.
+Note: This UI will be available to other devices on the network. 
