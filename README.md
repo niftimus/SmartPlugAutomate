@@ -1,28 +1,33 @@
 # Installing on Linux
 
-##Pre-requisites
+## Pre-requisites
 
-###Get software
+### Get software
 - Ubuntu 20.04 (64-bit): https://ubuntu.com/download/desktop
 - Anaconda: https://www.anaconda.com/products/individual
 
-###Create a new python environment
+### Create a new python environment
+
 `conda create -n SmartPlugAutomate python=3.8`
 
-###Activate the environment
+### Activate the environment
+
 `conda activate SmartPlugAutomate`
 
-###Clone the environment (replace home directory)
+### Clone the environment (replace home directory)
+
 `cd /home/david`
+
 `git clone https://github.com/niftimus/SmartPlugAutomate.git`
 
-###Install libraries
+### Install libraries
 `cd /home/david/SmartPlugAutomate`
+
 `pip install -r requirements.txt`
 
-##Configuration
+## Configuration
 
-###Edit configuration
+### Edit configuration
 
 Edit the file config/smartplug-car.json
 - Ensure _plug_address_ points to the IP of the TP-Link smartplug (e.g. 10.1.2.13)
@@ -33,7 +38,7 @@ Edit the file config/smartplug-car.json
 - Set _check_interval_ to the number of seconds for each check interval
 - Set _web_port_ to the port number of the UI interface
 
-###Create service
+### Create service
 Create a file as root /etc/systemd/system/smartplug-car.service (replace home directory as required):
 ```
 [Unit]
@@ -42,13 +47,10 @@ Description=SmartPlug charger (car) service
 [Service]
 User=david
 
-# The configuration file application.properties should be here:
-#change this to your workspace
+# Set the working directory
 WorkingDirectory=/home/david/SmartPlugAutomate
 
-#path to executable. 
-#executable is a bash script which calls jar file
-
+# Set the path to the script
 ExecStart=/home/david/SmartPlugAutomate/go.sh --config config/smartplug-car.json
 SuccessExitStatus=143
 TimeoutStopSec=10
@@ -63,7 +65,7 @@ Set the service to run automatically on startup:
 
 `sudo systemctl enable smartplug-car.service`
 
-##Running
+## Running
 
 Start the service:
 
@@ -84,7 +86,7 @@ Check that the service is running:
            └─1235 python smartcontrol.py --config config/smartplug-car.json
 ```
 
-##Usage
+## Usage
 
 Log in to the web UI:
 

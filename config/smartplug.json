@@ -1,6 +1,6 @@
 {
-    "plug_address": "10.1.2.12",
-    "solar_monitor_url": "http://10.1.2.3/production.json",
+    "plug_address": "192.168.1.102",
+    "solar_monitor_url": "http://192.168.1.101/production.json",
     "min_power": 70,
     "min_off": 30,
     "min_on": 1,
