@@ -5,6 +5,7 @@ import asyncclick as click
 from kasa import SmartPlug, SmartDeviceException
 from datetime import datetime
 import requests
+from urllib3.exceptions import InsecureRequestWarning
 import json
 from flask import Flask, render_template, request
 import threading
@@ -58,6 +59,7 @@ def CommandWithConfigFile(config_file_param_name):
 # Run main check / control loop
 @click.command(cls=CommandWithConfigFile('config'),context_settings=dict(ignore_unknown_options=True,allow_extra_args=True))
 @click.option('--plug_address', default="10.1.2.12", help='IP address of Smart Plug device.', type=str, required=True)
+@click.option('--inverter', default="sma", help='Inverter type (sma or enphase)', type=str, required=True)
 @click.option('--solar_monitor_url', default="http://10.1.2.3/production.json", help='URL of Solar Monitor device.',
               type=str, required=True)
 @click.option('--min_power', default=1700, help='Minimum solar power in Watts before switching on.', type=int,
@@ -67,7 +69,7 @@ def CommandWithConfigFile(config_file_param_name):
 @click.option('--check_interval', default=5, help='Check interval in seconds.', type=int, required=True)
 @click.option('--config', type=click.Path(), help='Path to config file name (optional).', required=False)
 @click.pass_context
-async def main(ctx, config, plug_address, solar_monitor_url, check_interval, min_power, min_off, min_on):
+async def main(ctx, config, plug_address, inverter, solar_monitor_url, check_interval, min_power, min_off, min_on):
     """Main control loop"""
     global gv_smartcontrol
 
@@ -96,11 +98,18 @@ async def main(ctx, config, plug_address, solar_monitor_url, check_interval, min
             # Get plug status (on or off)
             gv_smartcontrol.is_on = plug.is_on
 
+            # Suppress warnings
+            requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
+
             # Get current net Solar export from Enphase monitor API
-            r = requests.get(solar_monitor_url, timeout=3)
+            r = requests.get(solar_monitor_url, timeout=3, verify=False)
             solar_json = r.json()
-            gv_smartcontrol.overall_production = (solar_json["production"][1]["wNow"])
-            gv_smartcontrol.overall_consumption = (solar_json["consumption"][0]["wNow"])
+            if inverter=="enphase":
+                gv_smartcontrol.overall_production = (solar_json["production"][1]["wNow"])
+                gv_smartcontrol.overall_consumption = (solar_json["consumption"][0]["wNow"])
+            else:
+                gv_smartcontrol.overall_production = (solar_json["result"]["0199-xxxxxC06"]["6100_40463600"]["1"][0]["val"])
+                gv_smartcontrol.overall_consumption = (solar_json["result"]["0199-xxxxxC06"]["6100_40463700"]["1"][0]["val"])
             gv_smartcontrol.overall_net = gv_smartcontrol.overall_production - gv_smartcontrol.overall_consumption
             gv_smartcontrol.plug_consumption = plugRealtime["power_mw"] / 1000
 

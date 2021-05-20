@@ -1,6 +1,7 @@
 {
     "plug_address": "192.168.1.103",
-    "solar_monitor_url": "http://192.168.1.101/production.json",
+    "inverter": "sma",
+    "solar_monitor_url": "https://192.168.1.107/dyn/getDashValues.json",
     "min_power": 1700,
     "min_off": 60,
     "min_on": 60,
