@@ -94,15 +94,18 @@ async def main(ctx, config, plug_address, inverter, solar_monitor_url, check_int
             gv_smartcontrol.current_time = time.time()
             await plug.update()
 
+            # Get plug status (on or off)
+            gv_smartcontrol.is_on = plug.is_on
+
             # Check if plug has an energy meter - if not assume consumption is min_power
             if plug.has_emeter:
                 plugRealtime = await plug.get_emeter_realtime()
                 gv_smartcontrol.plug_consumption = plugRealtime["power_mw"] / 1000
             else:
-                gv_smartcontrol.plug_consumption = gv_smartcontrol.min_power
-
-            # Get plug status (on or off)
-            gv_smartcontrol.is_on = plug.is_on
+                if gv_smartcontrol.is_on:
+                    gv_smartcontrol.plug_consumption = gv_smartcontrol.min_power
+                else:
+                    gv_smartcontrol.plug_consumption = 0
 
             # Suppress warnings
             requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
