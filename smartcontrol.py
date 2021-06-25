@@ -93,7 +93,13 @@ async def main(ctx, config, plug_address, inverter, solar_monitor_url, check_int
             action_string = ""
             gv_smartcontrol.current_time = time.time()
             await plug.update()
-            plugRealtime = await plug.get_emeter_realtime()
+
+            # Check if plug has an energy meter - if not assume consumption is min_power
+            if plug.has_emeter:
+                plugRealtime = await plug.get_emeter_realtime()
+                gv_smartcontrol.plug_consumption = plugRealtime["power_mw"] / 1000
+            else:
+                gv_smartcontrol.plug_consumption = gv_smartcontrol.min_power
 
             # Get plug status (on or off)
             gv_smartcontrol.is_on = plug.is_on
@@ -111,7 +117,6 @@ async def main(ctx, config, plug_address, inverter, solar_monitor_url, check_int
                 gv_smartcontrol.overall_production = (solar_json["result"]["0199-xxxxxC06"]["6100_40463600"]["1"][0]["val"])
                 gv_smartcontrol.overall_consumption = (solar_json["result"]["0199-xxxxxC06"]["6100_40463700"]["1"][0]["val"])
             gv_smartcontrol.overall_net = gv_smartcontrol.overall_production - gv_smartcontrol.overall_consumption
-            gv_smartcontrol.plug_consumption = plugRealtime["power_mw"] / 1000
 
             time_since_off = gv_smartcontrol.current_time - last_offtime
             time_since_on = gv_smartcontrol.current_time - last_ontime

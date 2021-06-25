@@ -1,11 +1,11 @@
 {
-    "plug_address": "192.168.1.102",
+    "plug_address": "192.168.1.113",
     "inverter": "sma",
     "solar_monitor_url": "https://192.168.1.107/dyn/getDashValues.json",
     "min_power": 70,
     "min_off": 30,
-    "min_on": 1,
-    "check_interval": 5,
+    "min_on": 15,
+    "check_interval": 10,
     "web_host": "0.0.0.0",
-    "web_port": 8001
+    "web_port": 8002
 }

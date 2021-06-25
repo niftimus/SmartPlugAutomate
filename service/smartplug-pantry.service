@@ -1,0 +1,18 @@
+[Unit]
+Description=SmartPlug charger service
+
+[Service]
+User=david
+
+# Set the working directory
+WorkingDirectory=/home/david/SmartPlugAutomate
+
+# Set the path to the script
+ExecStart=/home/david/SmartPlugAutomate/go.sh --config config/smartplug-pantry.json
+SuccessExitStatus=143
+TimeoutStopSec=10
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
