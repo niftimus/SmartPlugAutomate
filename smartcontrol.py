@@ -157,7 +157,13 @@ async def main(ctx, config, plug_address, solar_monitor_url, check_interval, min
             print('HTTP Timeout exception... will retry next cycle.')
         except requests.exceptions.ConnectionError:
             print('HTTP Connection Error... will retry next cycle.')
-
+        except json.decoder.JSONDecodeError:
+            print('JSON decode error... will retry next cycle.')
+        except TypeError:
+            print('Cannot calculate net... will retry next cycle.')
+        except ConnectionResetError:
+            print('Connection reset... will retry next cycle.')
+        
         # Wait additional time until the next check cycle
         time.sleep(gv_smartcontrol.check_interval - (time.time() % gv_smartcontrol.check_interval))
 
